@@ -29,7 +29,7 @@ void setup()
 
   f=createFont("PressStart2P.ttf", 128);
 
-  bgm = new SoundFile(this, "retroPlatformSlow.wav");//need to change this to less ear-rapey song
+  bgm = new SoundFile(this, "gamemusic.wav");
   
 }
 
