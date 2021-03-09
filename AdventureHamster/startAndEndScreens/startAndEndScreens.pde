@@ -1,7 +1,11 @@
+import processing.sound.*;
 PImage hamster;
 PImage hamtrans;
 PImage howto;
 PFont f;
+
+//bgm = background music
+SoundFile bgm;
 
 boolean startScreen=true;
 
@@ -24,10 +28,15 @@ void setup()
   howto.loadPixels();
 
   f=createFont("PressStart2P.ttf", 128);
+
+  bgm = new SoundFile(this, "retroPlatform.mp3");
 }
 
 void draw()
 {
+
+  bgm.play();
+
   if (startScreen==true)
   {
     background(backColor);
@@ -77,5 +86,4 @@ void keyPressed()
   {
     startScreen=false;
   }
-
 }
