@@ -11,13 +11,13 @@ int[][] StartPointXY = {{815,547},
                         {255,255},
                         {965,547},
                         {1113,403}};//array of starting points
-int[][] doorLocal = {{1155,689},{30,107}}; //array of starting point for the door
+int[][] doorLocal = {{1161,692},{38,107}}; //array of starting point for the door
 
 //Classes
 class player
 {
 //float p_x = 250; float p_y = 250; //player position
-int initialPlayer = int(random(0,3));
+int initialPlayer = int(random(0,4));
 float p_x=StartPointXY[initialPlayer][0];
 float p_y=StartPointXY[initialPlayer][1];
 float v_x, v_y; //player velocity
@@ -43,7 +43,7 @@ class door
  float p_y=doorLocal[initialDoor][1];
  boolean keyMet = false; //key meets the door
  PImage image; //image of the door
- int size=100; //size of the door
+ int size=85; //size of the door
 }
 
 //Creating the Objects
@@ -59,6 +59,18 @@ fog = createImage(map.width,map.height,ARGB); //map sized blank image
 one.image = loadImage("hamster.png");//loads hamster
 berry.image = loadImage("key.png");//loads berry key
 door.image = loadImage("door.png");
+map.loadPixels(); door.image.resize(door.size,door.size);
+door.image.loadPixels();
+for ( int i = 0 ; i < door.image.width ; i++ ) {
+  for ( int j = 0 ; j < door.image.height ; j++ ) {
+    int doorSpot = (int(door.p_x)-door.size/2+i)
+                    + (int(door.p_y)-door.size/2 + j)*map.width;
+    if (door.image.pixels[i + j*door.image.width] != color(255)) {
+      map.pixels[doorSpot] = door.image.pixels[i + j*door.image.width];
+    }
+  }
+}
+map.updatePixels();
 //creating the animation
 playerFrames = 3;
 playerImages = new PImage[playerFrames];
@@ -98,16 +110,16 @@ fog.updatePixels();
 //Draw Function
 void draw(){
   imageMode(CORNER); //places the fog in the corner
-  //image(map,0,0); //for debug
+  image(map,0,0); //for debug
   int fowSize = 125;
   fogOfWar(int(one.p_x),int(one.p_y),fowSize); //lays down the fog of war
-  image(fog,0,0);//places the fog on the drawing
+  //image(fog,0,0);//places the fog on the drawing
   frameCnt++;
   
   imageMode(CENTER); //sprites are presented at center
   //image(door.image,door.p_x,door.p_y,door.size,door.size); //door placed
   image(one.image,one.p_x,one.p_y,one.size,one.size);//normal player deposited
-  one.v_y=1.75; one.v_x=1.75; //speed of player
+  one.v_y=2; one.v_x=2; //speed of player
   
   //Movement
     if (keyPressed && (key=='w'||key == 's'||key == 'a'||key == 'd')) {
@@ -127,15 +139,15 @@ void draw(){
     }
   }
   //println(one.p_x,one.p_y);//Prints location of player.
-  
-    //If their field of vision enters the doorsregion
+  /*
+  //If their field of vision enters the doorsregion
   if (one.p_x+fowSize/2>door.p_x-door.size/2 &&
       one.p_x-fowSize/2<door.p_x+door.size/2 &&
       one.p_y+fowSize/2>door.p_y-door.size/2 &&
       one.p_y-fowSize/2<door.p_y+door.size/2)
   {
     image(door.image,door.p_x,door.p_y,door.size,door.size); //door placed
-  }
+  }*/
   //If their field of vision enters the berrys region
   if (one.p_x+fowSize/2>berry.p_x && one.p_x-fowSize/2<berry.p_x &&
       one.p_y+fowSize/2>berry.p_y && one.p_y-fowSize/2<berry.p_y &&
@@ -152,12 +164,31 @@ void draw(){
   if (berry.tengo==true)
   {
     image(berry.image,1100,60,60,60); //Berry TR Place
+    if (one.p_x+door.size/2>door.p_x && one.p_x-berry.size/2<door.p_x &&
+      one.p_y+door.size/2>door.p_y && one.p_y-door.size/2<door.p_y)
+      {
+        door.keyMet = true;
+      }
   }
-  
+  if (door.keyMet == true)
+  {
+  background(255); //if the key goes to the door then the game ends
+  }
   //In case the player leaves map
   if (one.p_x>1200 || one.p_x<0 || one.p_y<0 || one.p_y>900)
   {
     one.p_x=250; one.p_y = 250;//Spawns the character here if they manage to leave map
   }
   
+}
+
+void mouseClicked()
+{
+  if (door.keyMet == true)
+  {
+  door.keyMet = false;
+  berry.tengo = false;
+  one.p_x=255; one.p_y=255;
+  berry.p_x = 0; berry.p_y = 0;
+  }
 }
