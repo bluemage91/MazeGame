@@ -18,25 +18,42 @@ PImage image; //image of the player
 int size = 35; //default size of player
 }
 
+class berryKey
+{
+float p_x; float p_y;
 boolean keyAcquired=false; //start the game with the key unacquired
+PImage image; //image of key
+}
 
+class door
+{
+ float p_x; float p_y; //original position
+ boolean keyMet = false; //key meets the door
+}
+
+//Creating the Objects
 player one = new player();
+berryKey berry = new berryKey();
+door door = new door();
 
+//Setup Function
 void setup()
 {
-map = loadImage("Maze SpriteV2.jpg");
-fog = createImage(map.width,map.height,ARGB);
+map = loadImage("Maze SpriteV2.jpg"); //attributes map png to variable
+fog = createImage(map.width,map.height,ARGB); //map sized blank image
+one.image = loadImage("hamster.png");//loads hamster
+berry.image = loadImage("key.png");//loads berry key
 //creating the animation
 playerFrames = 3;
-one.image = loadImage("hamster.png");
 playerImages = new PImage[playerFrames];
   for (int i = 0; i<playerFrames;i++){
     playerImages[i]=loadImage("roll"+i+".png");
   }
-size(1200,900);
-background(255);
+size(1200,900); //window creation
+background(255); //background creation
 }
 
+//Removes the ability to see the full map as the player
 void fogOfWar(int xpos,int ypos,int size)
 {
 //Creates the circle around the character
@@ -61,16 +78,21 @@ for (int i=0; i<map.width; i++)
 fog.updatePixels();
 }
 
+//Draw Function
 void draw(){
   imageMode(CORNER); //places the fog in the corner
-  fogOfWar(int(one.p_x),int(one.p_y),125);
-  image(fog,0,0);
+  fogOfWar(int(one.p_x),int(one.p_y),125); //lays down the fog of war
+  image(fog,0,0);//places the fog on the drawing
   frameCnt++;
+  
   imageMode(CENTER); //sprites are presented at center
   image(one.image,one.p_x,one.p_y,one.size,one.size);//normal player deposited
-  one.v_y=1.05; one.v_x=1.05;
+  one.v_y=1.75; one.v_x=1.75; //speed of player
+  
+  //Movement
     if (keyPressed && (key=='w'||key == 's'||key == 'a'||key == 'd')) {
-    image(playerImages[frameCnt%3],one.p_x,one.p_y,one.size,one.size);//animates the sprite
+    //animates the sprite
+    image(playerImages[frameCnt%3],one.p_x,one.p_y,one.size,one.size);
     if (key == 'w' || key == 'W') {
       one.p_y=one.p_y-one.v_y;//up
     }
@@ -84,5 +106,5 @@ void draw(){
       one.p_x=one.p_x+one.v_x;//right
     }
   }
-
+  println(one.p_x,one.p_y);//Prints location of player.
 }
