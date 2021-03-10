@@ -1,10 +1,16 @@
+//Initialization of proper global variables
+import processing.sound.*;
 PImage playerImages []; //animation images
 PImage player; //player image
 PImage map; //map image
 PImage fog; //fog of war
+PImage victory; //victory screen
+PImage loss; //defeat screen
 int playerFrames; //current frame of character animation
+int totaltime=90*1000; //time to complete the game in milliseconds
 int frameCnt=1; //frame count in the program
 PFont myFont; //new font
+SoundFile bgm;
 
 //Defining the start Points
 int[][] StartPointXY = {{815,547},
@@ -16,7 +22,6 @@ int[][] doorLocal = {{1161,692},{38,107}}; //array of starting point for the doo
 //Classes
 class player
 {
-//float p_x = 250; float p_y = 250; //player position
 int initialPlayer = int(random(0,4));
 float p_x=StartPointXY[initialPlayer][0];
 float p_y=StartPointXY[initialPlayer][1];
@@ -56,8 +61,23 @@ void setup()
 {
 map = loadImage("Maze SpriteV2.jpg"); //attributes map png to variable
 fog = createImage(map.width,map.height,ARGB); //map sized blank image
+victory = loadImage("youwon.jpg"); //victory screen
+loss = loadImage("gameover.jpg"); //defeat screen
 one.image = loadImage("hamster.png");//loads hamster
 berry.image = loadImage("key.png");//loads berry key
+berry.image.loadPixels();
+for ( int i = 0 ; i < berry.image.width ; i++ ) {
+  for ( int j = 0 ; j < berry.image.height ; j++ ) {
+    if (berry.image.pixels[i + j*berry.image.width] != color(255)) {
+     
+    }
+    else
+    {
+    berry.image.pixels[i + j*berry.image.width] = color(0,0,0,0);
+    }
+  }
+}
+berry.image.updatePixels();
 door.image = loadImage("door.png");
 map.loadPixels(); door.image.resize(door.size,door.size);
 door.image.loadPixels();
@@ -79,6 +99,8 @@ playerImages = new PImage[playerFrames];
   }
 size(1200,800); //window creation
 background(255); //background creation
+myFont = createFont("PressStart2P.ttf", 128);//creation of font
+//bgm = new SoundFile(this, "gamemusic.mp3");
 }
 
 //Removes the ability to see the full map as the player
@@ -109,17 +131,30 @@ fog.updatePixels();
 
 //Draw Function
 void draw(){
+  //bgm.play(); //plays the music
+  
+  //Background and Fog of War
   imageMode(CORNER); //places the fog in the corner
-  image(map,0,0); //for debug
+  //image(map,0,0); //for debug
   int fowSize = 125;
   fogOfWar(int(one.p_x),int(one.p_y),fowSize); //lays down the fog of war
-  //image(fog,0,0);//places the fog on the drawing
+  image(fog,0,0);//places the fog on the drawing
   frameCnt++;
   
+  //Countdown Timer
+  int time = millis();
+  int Seconds = ((time)/1000)%60;//presents the seconds
+  int Minutes = Seconds / 60; //represents the amount of minutes remaining
+  textFont(myFont,30);
+  fill(255);
+  //change position to wherever and presents the time
+  text(nf(Minutes, 2) + ":" + nf(Seconds, 2), 550, 50);
+  
+  //Sprite Portions
   imageMode(CENTER); //sprites are presented at center
   //image(door.image,door.p_x,door.p_y,door.size,door.size); //door placed
   image(one.image,one.p_x,one.p_y,one.size,one.size);//normal player deposited
-  one.v_y=2; one.v_x=2; //speed of player
+  one.v_y=3; one.v_x=3; //speed of player
   
   //Movement
     if (keyPressed && (key=='w'||key == 's'||key == 'a'||key == 'd')) {
@@ -139,15 +174,7 @@ void draw(){
     }
   }
   //println(one.p_x,one.p_y);//Prints location of player.
-  /*
-  //If their field of vision enters the doorsregion
-  if (one.p_x+fowSize/2>door.p_x-door.size/2 &&
-      one.p_x-fowSize/2<door.p_x+door.size/2 &&
-      one.p_y+fowSize/2>door.p_y-door.size/2 &&
-      one.p_y-fowSize/2<door.p_y+door.size/2)
-  {
-    image(door.image,door.p_x,door.p_y,door.size,door.size); //door placed
-  }*/
+
   //If their field of vision enters the berrys region
   if (one.p_x+fowSize/2>berry.p_x && one.p_x-fowSize/2<berry.p_x &&
       one.p_y+fowSize/2>berry.p_y && one.p_y-fowSize/2<berry.p_y &&
@@ -172,7 +199,9 @@ void draw(){
   }
   if (door.keyMet == true)
   {
-  background(255); //if the key goes to the door then the game ends
+    imageMode(CORNER);
+    image(victory,0,0); //victory screen
+    imageMode(CENTER);
   }
   //In case the player leaves map
   if (one.p_x>1200 || one.p_x<0 || one.p_y<0 || one.p_y>900)
@@ -189,6 +218,6 @@ void mouseClicked()
   door.keyMet = false;
   berry.tengo = false;
   one.p_x=255; one.p_y=255;
-  berry.p_x = 0; berry.p_y = 0;
+  berry.p_x = 1113; berry.p_y = 403;
   }
 }
