@@ -61,6 +61,18 @@ door door = new door();
 //Setup Function
 void setup()
 {
+if (one.initialPlayer == berry.initialKey) {
+    if (berry.initialKey == 3) {
+      berry.initialKey--;
+      berry.p_x=StartPointXY[berry.initialKey][0];
+      berry.p_y=StartPointXY[berry.initialKey][1];
+    } else {
+      berry.initialKey++;
+      berry.p_x=StartPointXY[berry.initialKey][0];
+      berry.p_y=StartPointXY[berry.initialKey][1];
+    }
+    berry.tengo = false;
+  }
 map = loadImage("Maze SpriteV2.jpg"); //attributes map png to variable
 fog = createImage(map.width,map.height,ARGB); //map sized blank image
 victory = loadImage("youwon.jpg"); //victory screen
