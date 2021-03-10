@@ -7,10 +7,12 @@ PImage fog; //fog of war
 PImage victory; //victory screen
 PImage loss; //defeat screen
 int playerFrames; //current frame of character animation
-int totaltime=90*1000; //time to complete the game in milliseconds
+int countdown = millis();
 int frameCnt=1; //frame count in the program
 PFont myFont; //new font
 SoundFile bgm;
+boolean defeat = false;
+
 
 //Defining the start Points
 int[][] StartPointXY = {{815,547},
@@ -64,21 +66,33 @@ fog = createImage(map.width,map.height,ARGB); //map sized blank image
 victory = loadImage("youwon.jpg"); //victory screen
 loss = loadImage("gameover.jpg"); //defeat screen
 one.image = loadImage("hamster.png");//loads hamster
-berry.image = loadImage("key.png");//loads berry key
-berry.image.loadPixels();
-for ( int i = 0 ; i < berry.image.width ; i++ ) {
-  for ( int j = 0 ; j < berry.image.height ; j++ ) {
-    if (berry.image.pixels[i + j*berry.image.width] != color(255)) {
-     
-    }
-    else
-    {
-    berry.image.pixels[i + j*berry.image.width] = color(0,0,0,0);
+one.image.loadPixels();
+PImage tmp = createImage(one.image.width, one.image.height,ARGB);
+tmp.loadPixels();
+for ( int i = 0 ; i < one.image.width ; i++ ) {
+  for ( int j = 0 ; j < one.image.height ; j++ ) {
+    if (one.image.pixels[i + j*one.image.width] != color(255)) {
+     tmp.pixels[i + j*one.image.width] = one.image.pixels[i + j*one.image.width]; //hamster remove white
     }
   }
 }
+one.image=tmp; //reset to have only the hamster
+one.image.updatePixels();
+berry.image = loadImage("key.png");//loads berry key
+berry.image.loadPixels();
+PImage tmp1 = createImage(berry.image.width, berry.image.height,ARGB);
+tmp.loadPixels();
+for ( int i = 0 ; i < berry.image.width ; i++ ) {
+  for ( int j = 0 ; j < berry.image.height ; j++ ) {
+    if (berry.image.pixels[i + j*berry.image.width] != color(255)) {
+     tmp1.pixels[i + j*berry.image.width] = berry.image.pixels[i + j*berry.image.width];
+    }
+  }
+}
+berry.image=tmp1;
 berry.image.updatePixels();
 door.image = loadImage("door.png");
+//Writes door to the map
 map.loadPixels(); door.image.resize(door.size,door.size);
 door.image.loadPixels();
 for ( int i = 0 ; i < door.image.width ; i++ ) {
@@ -91,12 +105,27 @@ for ( int i = 0 ; i < door.image.width ; i++ ) {
   }
 }
 map.updatePixels();
+
 //creating the animation
 playerFrames = 3;
 playerImages = new PImage[playerFrames];
-  for (int i = 0; i<playerFrames;i++){
+  for (int i = 0; i<playerFrames;i++)
+  {
     playerImages[i]=loadImage("roll"+i+".png");
+    playerImages[i].loadPixels();
+    PImage tmp3 = createImage(playerImages[i].width, playerImages[i].height,ARGB);
+    tmp3.loadPixels();
+    for ( int k = 0 ; k < playerImages[i].width ; k++ ) {
+      for ( int j = 0 ; j < playerImages[i].height ; j++ ) {
+        if (playerImages[i].pixels[k + j*playerImages[i].width] != color(255)) {
+         tmp3.pixels[k + j*playerImages[i].width] = playerImages[i].pixels[k + j*playerImages[i].width]; //hamster remove white
+        }
+      }
+    }
+    playerImages[i]=tmp3; //reset to have only the hamster
+    playerImages[i].updatePixels();
   }
+
 size(1200,800); //window creation
 background(255); //background creation
 myFont = createFont("PressStart2P.ttf", 128);//creation of font
@@ -117,11 +146,11 @@ for (int i=0; i<map.width; i++)
     int halfSize = int(size/2);
     if (i<=xpos+halfSize && i>=xpos-halfSize && j<=ypos+halfSize && j>=ypos-halfSize)
     {
-      fog.pixels[index]=map.pixels[index];
+      fog.pixels[index]=map.pixels[index]; //rewrites within the fog the original map
     }
     else
     {
-      fog.pixels[index]=color(0,0,0);
+      fog.pixels[index]=color(0,0,0); //everywhere else is black
     }
   }
 }
@@ -144,16 +173,20 @@ void draw(){
   //Countdown Timer
   int time = millis();
   int Seconds = ((time)/1000)%60;//presents the seconds
-  int Minutes = Seconds / 60; //represents the amount of minutes remaining
+  int Minutes = ((time)/(1000*60)) % 60; //represents the amount of minutes remaining
   textFont(myFont,30);
   fill(255);
   //change position to wherever and presents the time
   text(nf(Minutes, 2) + ":" + nf(Seconds, 2), 550, 50);
   
+  //GameOver Timing
+  if (time/1000%60==90)
+  {
+    defeat=true; //means player lost
+  }
+  
   //Sprite Portions
   imageMode(CENTER); //sprites are presented at center
-  //image(door.image,door.p_x,door.p_y,door.size,door.size); //door placed
-  image(one.image,one.p_x,one.p_y,one.size,one.size);//normal player deposited
   one.v_y=3; one.v_x=3; //speed of player
   
   //Movement
@@ -172,8 +205,11 @@ void draw(){
     if (key == 'd' || key == 'D') {
       one.p_x=one.p_x+one.v_x;//right
     }
-  }
-  //println(one.p_x,one.p_y);//Prints location of player.
+    }
+    else
+    {
+    image(one.image,one.p_x,one.p_y,one.size,one.size);//normal player deposited
+    }
 
   //If their field of vision enters the berrys region
   if (one.p_x+fowSize/2>berry.p_x && one.p_x-fowSize/2<berry.p_x &&
@@ -203,6 +239,15 @@ void draw(){
     image(victory,0,0); //victory screen
     imageMode(CENTER);
   }
+  
+  //Game Over Screen
+  if (defeat==true && door.keyMet==false)
+  {
+    imageMode(CORNER);
+    image(loss,0,0);
+    imageMode(CENTER);
+  }
+  
   //In case the player leaves map
   if (one.p_x>1200 || one.p_x<0 || one.p_y<0 || one.p_y>900)
   {
@@ -216,6 +261,13 @@ void mouseClicked()
   if (door.keyMet == true)
   {
   door.keyMet = false;
+  berry.tengo = false;
+  one.p_x=255; one.p_y=255;
+  berry.p_x = 1113; berry.p_y = 403;
+  }
+  if (defeat == true)
+  {
+  defeat = false;
   berry.tengo = false;
   one.p_x=255; one.p_y=255;
   berry.p_x = 1113; berry.p_y = 403;
