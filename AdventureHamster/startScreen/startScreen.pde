@@ -1,11 +1,11 @@
-import processing.sound.*;
+//import processing.sound.*;
 PImage hamster;
 PImage hamtrans;
 PImage howto;
 PFont f;
 
 //bgm = background music
-SoundFile bgm;
+//SoundFile bgm;
 
 boolean startScreen=true;
 
@@ -29,13 +29,12 @@ void setup()
 
   f=createFont("PressStart2P.ttf", 128);
 
-  bgm = new SoundFile(this, "gamemusic.wav");
-  
+  //bgm = new SoundFile(this, "gamemusic.wav");
 }
 
 void draw()
 {
-  bgm.play();
+ // bgm.play();
 
   if (startScreen==true)
   {
@@ -86,4 +85,9 @@ void keyPressed()
   {
     startScreen=false;
   }
+}
+
+void mousePressed()
+{
+  saveFrame("startscreen.jpg");
 }
